@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, Image, StyleSheet } from 'react-native';
 import { Trainer } from '../types';
+import { TrainerFileManager } from './TrainerFileManager';
 
 interface TrainerModalProps {
   visible: boolean;
@@ -15,6 +16,8 @@ const TrainerModal: React.FC<TrainerModalProps> = ({
   onClose,
   onBookSession,
 }) => {
+  const [showFileManager, setShowFileManager] = useState(false);
+  
   if (!selectedTrainer) return null;
 
   return (
@@ -57,12 +60,23 @@ const TrainerModal: React.FC<TrainerModalProps> = ({
               </View>
             </View>
             
-            <TouchableOpacity style={styles.bookButton} onPress={onBookSession}>
-              <Text style={styles.bookButtonText}>Book Session</Text>
-            </TouchableOpacity>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.filesButton} onPress={() => setShowFileManager(true)}>
+                <Text style={styles.filesButtonText}>📁 Files</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.bookButton} onPress={onBookSession}>
+                <Text style={styles.bookButtonText}>Book Session</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </View>
+      
+      <TrainerFileManager
+        trainerId={selectedTrainer.id}
+        visible={showFileManager}
+        onClose={() => setShowFileManager(false)}
+      />
     </Modal>
   );
 };
@@ -146,12 +160,31 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
   },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    gap: 12,
+  },
+  filesButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    flex: 1,
+  },
+  filesButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
   bookButton: {
     backgroundColor: '#000',
     borderRadius: 12,
-    paddingHorizontal: 40,
+    paddingHorizontal: 24,
     paddingVertical: 16,
-    minWidth: 200,
+    flex: 1,
   },
   bookButtonText: {
     color: '#FFF',

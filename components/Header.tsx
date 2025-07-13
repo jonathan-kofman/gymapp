@@ -59,6 +59,12 @@ const Header: React.FC<HeaderProps> = ({ showMap, onToggleView, onProfileOption 
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.dropdownItem}
+              onPress={() => handleOptionPress('Trainers')}
+            >
+              <Text style={styles.dropdownItemText}>Trainers</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.dropdownItem}
               onPress={() => handleOptionPress('Settings')}
             >
               <Text style={styles.dropdownItemText}>Settings</Text>

@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native';
 import * as Location from 'expo-location';
 import { fetchNearbyFitnessLocations, getMockFitnessZones } from './utils/placesApi';
-import { mockTrainers } from './data/mockData';
 import { Location as LocationType, FitnessZone, Trainer } from './types';
+import { TrainerService } from './utils/trainerService';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Components
@@ -21,6 +21,7 @@ import ProfilePage from './components/ProfilePage';
 import SettingsPage from './components/SettingsPage';
 import BookingsPage from './components/BookingsPage';
 import HelpPage from './components/HelpPage';
+import TrainersPage from './components/TrainersPage';
 
 const MainApp: React.FC = () => {
   const { state: authState, logout } = useAuth();
@@ -35,14 +36,25 @@ const MainApp: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showMap, setShowMap] = useState<boolean>(true);
   const [fetchingLocations, setFetchingLocations] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState<'main' | 'profile' | 'settings' | 'bookings' | 'help'>('main');
+  const [currentPage, setCurrentPage] = useState<'main' | 'profile' | 'settings' | 'bookings' | 'help' | 'trainers'>('main');
 
   useEffect(() => {
     if (authState.isAuthenticated) {
       requestLocationPermission();
-      setTrainers(mockTrainers);
+      loadTrainers();
     }
   }, [authState.isAuthenticated]);
+
+  const loadTrainers = async () => {
+    try {
+      const approvedTrainers = await TrainerService.getApprovedTrainers();
+      setTrainers(approvedTrainers);
+    } catch (error) {
+      console.error('Error loading trainers:', error);
+      // Fallback to empty array if Firebase fails
+      setTrainers([]);
+    }
+  };
 
   const requestLocationPermission = async (): Promise<void> => {
     try {
@@ -94,11 +106,17 @@ const MainApp: React.FC = () => {
     }
   };
 
-  const onZonePress = (zone: FitnessZone): void => {
+  const onZonePress = async (zone: FitnessZone): Promise<void> => {
     setSelectedZone(zone);
-    const zoneTrainers = mockTrainers.filter(trainer => trainer.zoneId === zone.id);
-    setTrainers(zoneTrainers);
-    setModalVisible(true);
+    try {
+      const zoneTrainers = await TrainerService.getTrainersByZone(zone.id);
+      setTrainers(zoneTrainers);
+      setModalVisible(true);
+    } catch (error) {
+      console.error('Error loading zone trainers:', error);
+      setTrainers([]);
+      setModalVisible(true);
+    }
   };
 
   const onTrainerPress = (trainer: Trainer): void => {
@@ -154,6 +172,9 @@ const MainApp: React.FC = () => {
       case 'Profile':
         setCurrentPage('profile');
         break;
+      case 'Trainers':
+        setCurrentPage('trainers');
+        break;
       case 'Settings':
         setCurrentPage('settings');
         break;
@@ -208,6 +229,10 @@ const MainApp: React.FC = () => {
   // Render different pages based on currentPage state
   if (currentPage === 'profile') {
     return <ProfilePage onBack={handleBackToMain} />;
+  }
+
+  if (currentPage === 'trainers') {
+    return <TrainersPage onBack={handleBackToMain} trainers={trainers} onTrainerPress={onTrainerPress} />;
   }
 
   if (currentPage === 'settings') {
