@@ -2,18 +2,20 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
+import { FIREBASE_CONFIG } from './environment';
 
-const firebaseConfig = {
-  // Your Firebase config object
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-sender-id",
-  appId: "your-app-id"
-};
+// Initialize Firebase with environment configuration
+export const app = initializeApp(FIREBASE_CONFIG);
 
-export const app = initializeApp(firebaseConfig);
+// Initialize Firebase services
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const storage = getStorage(app); 
+export const storage = getStorage(app);
+
+// Enable offline persistence for Firestore
+// This allows the app to work offline and sync when online
+// db.settings({
+//   cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+// });
+
+console.log('Firebase initialized successfully'); 
