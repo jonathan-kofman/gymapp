@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Trainer } from '../types';
-import { TrainerFileManager } from './TrainerFileManager';
 import { TrainerService } from '../utils/trainerService';
 
 interface TrainersPageProps {
@@ -27,10 +26,8 @@ const TrainersPage: React.FC<TrainersPageProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [trainers, setTrainers] = useState<Trainer[]>(initialTrainers);
   const [loading, setLoading] = useState(false);
-  const [selectedTrainerForFiles, setSelectedTrainerForFiles] = useState<Trainer | null>(null);
-  const [showFileManager, setShowFileManager] = useState(false);
 
-  // Load trainers from Firebase when component mounts
+  // Load trainers when component mounts
   useEffect(() => {
     loadTrainers();
   }, []);
@@ -70,10 +67,7 @@ const TrainersPage: React.FC<TrainersPageProps> = ({
     onTrainerPress(trainer);
   };
 
-  const handleFilesPress = (trainer: Trainer) => {
-    setSelectedTrainerForFiles(trainer);
-    setShowFileManager(true);
-  };
+
 
   return (
     <View style={styles.container}>
@@ -125,12 +119,6 @@ const TrainersPage: React.FC<TrainersPageProps> = ({
               
               <View style={styles.trainerActions}>
                 <TouchableOpacity
-                  style={styles.filesButton}
-                  onPress={() => handleFilesPress(trainer)}
-                >
-                  <Text style={styles.filesButtonText}>📁 Files</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   style={styles.bookButton}
                   onPress={() => handleTrainerPress(trainer)}
                 >
@@ -142,17 +130,6 @@ const TrainersPage: React.FC<TrainersPageProps> = ({
         )}
       </ScrollView>
 
-      {/* File Manager Modal */}
-      {selectedTrainerForFiles && (
-        <TrainerFileManager
-          trainerId={selectedTrainerForFiles.id}
-          visible={showFileManager}
-          onClose={() => {
-            setShowFileManager(false);
-            setSelectedTrainerForFiles(null);
-          }}
-        />
-      )}
     </View>
   );
 };

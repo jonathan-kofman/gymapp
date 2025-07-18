@@ -56,7 +56,7 @@ export interface FitnessZone {
 }
 
 export interface Trainer {
-  id: number;
+  id: string;
   name: string;
   specialty: string;
   rating: number;

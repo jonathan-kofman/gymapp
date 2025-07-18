@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Modal, Image, StyleSheet } from 'react-native';
 import { Trainer } from '../types';
-import { TrainerFileManager } from './TrainerFileManager';
 
 interface TrainerModalProps {
   visible: boolean;
@@ -16,8 +15,6 @@ const TrainerModal: React.FC<TrainerModalProps> = ({
   onClose,
   onBookSession,
 }) => {
-  const [showFileManager, setShowFileManager] = useState(false);
-  
   if (!selectedTrainer) return null;
 
   return (
@@ -61,9 +58,6 @@ const TrainerModal: React.FC<TrainerModalProps> = ({
             </View>
             
             <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.filesButton} onPress={() => setShowFileManager(true)}>
-                <Text style={styles.filesButtonText}>📁 Files</Text>
-              </TouchableOpacity>
               <TouchableOpacity style={styles.bookButton} onPress={onBookSession}>
                 <Text style={styles.bookButtonText}>Book Session</Text>
               </TouchableOpacity>
@@ -71,12 +65,6 @@ const TrainerModal: React.FC<TrainerModalProps> = ({
           </View>
         </View>
       </View>
-      
-      <TrainerFileManager
-        trainerId={selectedTrainer.id}
-        visible={showFileManager}
-        onClose={() => setShowFileManager(false)}
-      />
     </Modal>
   );
 };

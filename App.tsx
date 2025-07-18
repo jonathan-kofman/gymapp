@@ -7,6 +7,7 @@ import { fetchNearbyFitnessLocations, getMockFitnessZones } from './utils/places
 import { Location as LocationType, FitnessZone, Trainer } from './types';
 import { TrainerService } from './utils/trainerService';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Components
 import LoadingScreen from './components/LoadingScreen';
@@ -51,7 +52,7 @@ const MainApp: React.FC = () => {
       setTrainers(approvedTrainers);
     } catch (error) {
       console.error('Error loading trainers:', error);
-      // Fallback to empty array if Firebase fails
+      // Fallback to empty array if trainer service fails
       setTrainers([]);
     }
   };
@@ -184,6 +185,7 @@ const MainApp: React.FC = () => {
       case 'Help':
         setCurrentPage('help');
         break;
+
       case 'Logout':
         Alert.alert(
           'Logout',
@@ -246,6 +248,8 @@ const MainApp: React.FC = () => {
   if (currentPage === 'help') {
     return <HelpPage onBack={handleBackToMain} />;
   }
+
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -320,9 +324,11 @@ const styles = StyleSheet.create({
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

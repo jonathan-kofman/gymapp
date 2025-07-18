@@ -1,258 +1,116 @@
-import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy,
-  limit,
-  startAfter,
-  DocumentData,
-  QueryDocumentSnapshot
-} from 'firebase/firestore';
-import { db } from '../firebase/config';
 import { Trainer } from '../types';
 
-export interface FirebaseTrainer extends Omit<Trainer, 'id'> {
-  id: string;
-  userId: string;
-  isApproved: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Mock trainer data
+const mockTrainers: Trainer[] = [
+  {
+    id: '1',
+    name: 'John Smith',
+    specialty: 'Strength Training',
+    rating: 4.8,
+    hourlyRate: 75,
+    experience: '8 years',
+    avatar: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=150&h=150&fit=crop&crop=face',
+    zoneId: 1,
+  },
+  {
+    id: '2',
+    name: 'Sarah Johnson',
+    specialty: 'Yoga & Flexibility',
+    rating: 4.9,
+    hourlyRate: 65,
+    experience: '5 years',
+    avatar: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=150&h=150&fit=crop&crop=face',
+    zoneId: 1,
+  },
+  {
+    id: '3',
+    name: 'Mike Davis',
+    specialty: 'Cardio & HIIT',
+    rating: 4.7,
+    hourlyRate: 70,
+    experience: '6 years',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
+    zoneId: 2,
+  },
+  {
+    id: '4',
+    name: 'Lisa Chen',
+    specialty: 'Weight Loss',
+    rating: 4.6,
+    hourlyRate: 60,
+    experience: '4 years',
+    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
+    zoneId: 2,
+  },
+  {
+    id: '5',
+    name: 'David Wilson',
+    specialty: 'CrossFit',
+    rating: 4.8,
+    hourlyRate: 80,
+    experience: '7 years',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face',
+    zoneId: 3,
+  },
+];
 
 export class TrainerService {
-  private static COLLECTION_NAME = 'trainers';
-
-  // Get all approved trainers
   static async getApprovedTrainers(): Promise<Trainer[]> {
-    try {
-      const trainersQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('isApproved', '==', true),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(trainersQuery);
-      const trainers: Trainer[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as FirebaseTrainer;
-        trainers.push({
-          id: doc.id,
-          name: data.name,
-          specialty: data.specialty,
-          rating: data.rating,
-          hourlyRate: data.hourlyRate,
-          experience: data.experience,
-          avatar: data.avatar,
-          zoneId: data.zoneId,
-        });
-      });
-      
-      return trainers;
-    } catch (error) {
-      console.error('Error getting approved trainers:', error);
-      throw error;
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockTrainers;
   }
 
-  // Get trainers by zone
   static async getTrainersByZone(zoneId: number): Promise<Trainer[]> {
-    try {
-      const trainersQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('isApproved', '==', true),
-        where('zoneId', '==', zoneId),
-        orderBy('rating', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(trainersQuery);
-      const trainers: Trainer[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as FirebaseTrainer;
-        trainers.push({
-          id: doc.id,
-          name: data.name,
-          specialty: data.specialty,
-          rating: data.rating,
-          hourlyRate: data.hourlyRate,
-          experience: data.experience,
-          avatar: data.avatar,
-          zoneId: data.zoneId,
-        });
-      });
-      
-      return trainers;
-    } catch (error) {
-      console.error('Error getting trainers by zone:', error);
-      throw error;
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return mockTrainers.filter(trainer => trainer.zoneId === zoneId);
   }
 
-  // Get a specific trainer by ID
   static async getTrainerById(trainerId: string): Promise<Trainer | null> {
-    try {
-      const trainerDoc = await getDoc(doc(db, this.COLLECTION_NAME, trainerId));
-      
-      if (trainerDoc.exists()) {
-        const data = trainerDoc.data() as FirebaseTrainer;
-        return {
-          id: trainerDoc.id,
-          name: data.name,
-          specialty: data.specialty,
-          rating: data.rating,
-          hourlyRate: data.hourlyRate,
-          experience: data.experience,
-          avatar: data.avatar,
-          zoneId: data.zoneId,
-        };
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error getting trainer by ID:', error);
-      throw error;
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+    return mockTrainers.find(trainer => trainer.id === trainerId) || null;
   }
 
-  // Create a new trainer profile
-  static async createTrainer(trainerData: Omit<FirebaseTrainer, 'id' | 'createdAt' | 'updatedAt' | 'isApproved'>): Promise<string> {
-    try {
-      const now = new Date();
-      const trainerDoc = await addDoc(collection(db, this.COLLECTION_NAME), {
-        ...trainerData,
-        isApproved: false, // New trainers need approval
-        createdAt: now,
-        updatedAt: now,
-      });
-      
-      return trainerDoc.id;
-    } catch (error) {
-      console.error('Error creating trainer:', error);
-      throw error;
-    }
-  }
-
-  // Update trainer profile
-  static async updateTrainer(trainerId: string, updates: Partial<FirebaseTrainer>): Promise<void> {
-    try {
-      const trainerRef = doc(db, this.COLLECTION_NAME, trainerId);
-      await updateDoc(trainerRef, {
-        ...updates,
-        updatedAt: new Date(),
-      });
-    } catch (error) {
-      console.error('Error updating trainer:', error);
-      throw error;
-    }
-  }
-
-  // Delete trainer profile
-  static async deleteTrainer(trainerId: string): Promise<void> {
-    try {
-      await deleteDoc(doc(db, this.COLLECTION_NAME, trainerId));
-    } catch (error) {
-      console.error('Error deleting trainer:', error);
-      throw error;
-    }
-  }
-
-  // Search trainers by name or specialty
   static async searchTrainers(searchTerm: string): Promise<Trainer[]> {
-    try {
-      // Note: Firestore doesn't support full-text search natively
-      // This is a simple implementation - consider using Algolia or similar for better search
-      const trainersQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('isApproved', '==', true),
-        orderBy('name')
-      );
-      
-      const querySnapshot = await getDocs(trainersQuery);
-      const trainers: Trainer[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as FirebaseTrainer;
-        const trainer = {
-          id: doc.id,
-          name: data.name,
-          specialty: data.specialty,
-          rating: data.rating,
-          hourlyRate: data.hourlyRate,
-          experience: data.experience,
-          avatar: data.avatar,
-          zoneId: data.zoneId,
-        };
-        
-        // Simple client-side filtering
-        if (trainer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            trainer.specialty.toLowerCase().includes(searchTerm.toLowerCase())) {
-          trainers.push(trainer);
-        }
-      });
-      
-      return trainers;
-    } catch (error) {
-      console.error('Error searching trainers:', error);
-      throw error;
-    }
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const term = searchTerm.toLowerCase();
+    return mockTrainers.filter(trainer => 
+      trainer.name.toLowerCase().includes(term) ||
+      trainer.specialty.toLowerCase().includes(term)
+    );
   }
 
-  // Get trainers with pagination
-  static async getTrainersWithPagination(
-    pageSize: number = 10,
-    lastDoc?: QueryDocumentSnapshot<DocumentData>
-  ): Promise<{ trainers: Trainer[]; lastDoc: QueryDocumentSnapshot<DocumentData> | null }> {
-    try {
-      let trainersQuery = query(
-        collection(db, this.COLLECTION_NAME),
-        where('isApproved', '==', true),
-        orderBy('createdAt', 'desc'),
-        limit(pageSize)
-      );
+  static async createTrainer(trainerData: Omit<Trainer, 'id'>): Promise<Trainer> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 600));
+    const newTrainer: Trainer = {
+      ...trainerData,
+      id: `trainer_${Date.now()}`,
+    };
+    mockTrainers.push(newTrainer);
+    return newTrainer;
+  }
 
-      if (lastDoc) {
-        trainersQuery = query(
-          collection(db, this.COLLECTION_NAME),
-          where('isApproved', '==', true),
-          orderBy('createdAt', 'desc'),
-          startAfter(lastDoc),
-          limit(pageSize)
-        );
-      }
-      
-      const querySnapshot = await getDocs(trainersQuery);
-      const trainers: Trainer[] = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as FirebaseTrainer;
-        trainers.push({
-          id: doc.id,
-          name: data.name,
-          specialty: data.specialty,
-          rating: data.rating,
-          hourlyRate: data.hourlyRate,
-          experience: data.experience,
-          avatar: data.avatar,
-          zoneId: data.zoneId,
-        });
-      });
-      
-      const lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1] || null;
-      
-      return {
-        trainers,
-        lastDoc: lastVisible,
-      };
-    } catch (error) {
-      console.error('Error getting trainers with pagination:', error);
-      throw error;
-    }
+  static async updateTrainer(trainerId: string, updates: Partial<Trainer>): Promise<Trainer | null> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 400));
+    const index = mockTrainers.findIndex(trainer => trainer.id === trainerId);
+    if (index === -1) return null;
+    
+    mockTrainers[index] = { ...mockTrainers[index], ...updates };
+    return mockTrainers[index];
+  }
+
+  static async deleteTrainer(trainerId: string): Promise<boolean> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const index = mockTrainers.findIndex(trainer => trainer.id === trainerId);
+    if (index === -1) return false;
+    
+    mockTrainers.splice(index, 1);
+    return true;
   }
 } 
